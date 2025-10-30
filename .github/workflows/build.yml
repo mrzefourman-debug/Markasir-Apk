@@ -6,34 +6,56 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      ANDROID_SDK_ROOT: /opt/android-sdk
 
     steps:
-    - name: Ambil kode dari repo
-      uses: actions/checkout@v4
+      - name: Ambil kode dari repo
+        uses: actions/checkout@v4
 
-    - name: Pasang Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.10"
+      - name: Pasang Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
 
-    - name: Instal dependensi dasar
-      run: |
-        sudo apt update
-        sudo apt install -y python3-pip git zip openjdk-17-jdk wget unzip
-        pip install --upgrade pip
-        pip install buildozer cython
+      - name: Instal dependensi dasar
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip git zip unzip openjdk-17-jdk wget ca-certificates
+          pip install --upgrade pip
+          pip install buildozer cython
 
-    - name: Persiapkan Buildozer dan SDK Android
-      run: |
-        yes | sdkmanager --licenses || true
-        sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0" || true
+      - name: Install Android command-line tools (sdkmanager)
+        run: |
+          mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
+          cd /tmp
+          # ambil commandlinetools terbaru (nama file bisa berubah, ini generic link)
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O commandlinetools.zip
+          unzip -q commandlinetools.zip
+          # tempatkan di $ANDROID_SDK_ROOT/cmdline-tools/latest
+          mkdir -p $ANDROID_SDK_ROOT/cmdline-tools/latest
+          mv cmdline-tools/* $ANDROID_SDK_ROOT/cmdline-tools/latest/
+          rm -rf commandlinetools.zip
+          # set PATH sementara untuk step-step berikutnya
+          export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
+          sdkmanager --version
 
-    - name: Bangun APK
-      run: |
-        buildozer android debug
+      - name: Terima lisensi SDK & install platform + build-tools
+        env:
+          PATH: ${{ env.ANDROID_SDK_ROOT }}/cmdline-tools/latest/bin:${{ env.PATH }}
+        run: |
+          # terima semua lisensi (jika ada prompt)
+          yes | sdkmanager --licenses || true
+          # install platform-tools, platform android-33, dan build-tools 33.0.0 (mengandung aidl)
+          sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0"
 
-    - name: Unggah hasil APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: Markasir-APK
-        path: bin/*.apk
+      - name: Bangun APK
+        run: |
+          # jalankan buildozer (pastikan buildozer.spec ada di root repo)
+          buildozer android debug
+
+      - name: Unggah hasil APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Markasir-APK
+          path: bin/*.apk
