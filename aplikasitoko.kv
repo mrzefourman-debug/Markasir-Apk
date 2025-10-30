@@ -1,0 +1,145 @@
+<AplikasiKasirRoot>:
+    orientation: 'vertical'
+    padding: 10
+    spacing: 10
+    canvas.before:
+        Color:
+            rgba: 1, 0.97, 0.88, 1  # cream background halaman
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    # === Header Status & Login ===
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: '40dp'
+        spacing: 5
+        Label:
+            id: status_admin
+            text: "Status: Mode Kasir/Publik"
+            size_hint_x: 0.6
+            color: 0,0,0,1
+            bold: True
+        Button:
+            text: "Login Admin"
+            size_hint_x: 0.2
+            background_color: 0.2, 0.6, 0.2, 1
+            color: 1,1,1,1
+            on_release: root.open_login()
+        Button:
+            text: "Logout"
+            size_hint_x: 0.2
+            background_color: 1, 0.6, 0, 1
+            color: 1,1,1,1
+            on_release: root.logout()
+
+    # === Total, Bayar, Transaksi Baru ===
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: '50dp'
+        spacing: 10
+        Label:
+            text: root.total_text
+            size_hint_x: 0.3
+            bold: True
+            color: 0,0,0,1
+        TextInput:
+            id: input_bayar
+            hint_text: "Masukkan nominal bayar"
+            multiline: False
+            input_filter: 'int'
+            size_hint_x: 0.3
+            background_color: 1,1,1,1
+            foreground_color: 0,0,0,1
+        Button:
+            text: "Bayar"
+            size_hint_x: 0.2
+            background_color: 0.2, 0.6, 0.2, 1
+            color: 1,1,1,1
+            on_release: root.proses_bayar()
+        Button:
+            text: "Transaksi Baru"
+            size_hint_x: 0.2
+            background_color: 0.1,0.5,0.8,1
+            color: 1,1,1,1
+            on_release: root.reset_transaksi()
+
+    # === Scroll area utama ===
+    ScrollView:
+        do_scroll_x: False
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            height: self.minimum_height
+            spacing: 10
+
+            # === Keranjang ===
+            Label:
+                text: "Keranjang Belanja"
+                bold: True
+                size_hint_y: None
+                height: '30dp'
+                color: 0,0,0,1
+            GridLayout:
+                id: keranjang_box
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height
+                row_default_height: 30
+                row_force_default: True
+                canvas.before:
+                    Color:
+                        rgba: 1,1,1,1  # background putih untuk keranjang
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+            # === Input Barang ===
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_y: None
+                height: '50dp'
+                spacing: 10
+                TextInput:
+                    id: input_nama
+                    hint_text: "Ketik nama barang"
+                    multiline: False
+                    on_text: root.update_suggestions()
+                    background_color: 1,1,1,1
+                    foreground_color: 0,0,0,1
+                Button:
+                    id: btn_tambah
+                    text: "Tambah Barang"
+                    background_color: 0.2, 0.6, 0.2, 1
+                    color: 1,1,1,1
+                    on_release: root.open_tambah_barang()
+                Button:
+                    id: btn_lihat
+                    text: "Lihat Semua"
+                    background_color: 1, 0.6, 0, 1
+                    color: 1,1,1,1
+                    on_release: root.lihat_semua()
+
+            # === Saran Autocomplete ===
+            Label:
+                id: label_saran
+                text: "Ketik nama barang untuk melihat saran."
+                size_hint_y: None
+                height: '30dp'
+                color: 0,0,0,1
+
+            GridLayout:
+                id: saran_box
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height
+
+            # === Status transaksi ===
+            Label:
+                id: label_status
+                text: root.status_text
+                size_hint_y: None
+                height: '30dp'
+                color: 0,0,0,1
