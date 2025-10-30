@@ -9,7 +9,7 @@ jobs:
 
     steps:
       - name: Ambil kode dari repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Pasang Python
         uses: actions/setup-python@v4
