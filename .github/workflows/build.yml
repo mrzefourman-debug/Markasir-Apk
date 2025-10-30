@@ -1,9 +1,8 @@
-name: Build APK Kivy (Markasir)
+name: Build APK (Kivy App)
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   build:
@@ -16,7 +15,7 @@ jobs:
       - name: Pasang Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: '3.10'
 
       - name: Instal dependensi dasar
         run: |
@@ -25,20 +24,19 @@ jobs:
           pip install --upgrade pip
           pip install buildozer cython virtualenv
 
-      - name: Instal Android command-line tools
+      - name: Instal Android SDK dan Build-Tools lengkap
         run: |
+          export ANDROID_SDK_ROOT=$HOME/android-sdk
           mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
           cd $ANDROID_SDK_ROOT/cmdline-tools
           curl -O https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
           unzip -q commandlinetools-linux-11076708_latest.zip
           mkdir -p latest
           mv cmdline-tools/* latest/ || true
-
-      - name: Terima lisensi SDK & install platform + build-tools
-        run: |
           export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
-          yes | sdkmanager --licenses || true
-          sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0"
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0" "tools" "cmdline-tools;latest"
+          sdkmanager --install "build-tools;33.0.0" "platforms;android-33"
 
       - name: Siapkan Buildozer
         run: |
@@ -48,11 +46,12 @@ jobs:
 
       - name: Bangun APK
         run: |
+          export ANDROID_SDK_ROOT=$HOME/android-sdk
           export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
           buildozer android debug
 
       - name: Unggah hasil APK
         uses: actions/upload-artifact@v4
         with:
-          name: Markasir-APK
+          name: Hasil-APK
           path: bin/*.apk
