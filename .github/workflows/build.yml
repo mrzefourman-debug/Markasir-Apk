@@ -25,7 +25,7 @@ jobs:
 
       - name: Persiapkan Buildozer
         run: |
-          buildozer init
+          buildozer android debug
           sed -i 's/# (str) Title of your application/title = Markasir/' buildozer.spec
           sed -i 's/package.name = myapp/package.name = markasir/' buildozer.spec
           sed -i 's/package.domain = org.example/package.domain = org.markasir/' buildozer.spec
